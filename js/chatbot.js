@@ -22,7 +22,16 @@ ChatBot.start = function () {
         ChatBot.bindErrorHandlers();
         ChatBot.initSpeechConfig();
         ChatBot.bindUserActions();
-        ChatBot.write("Hello, My name is Boto. What is yours?", "boto");
+        $.post(ChatBot.SERVER_PATH + "/chat", { "msg": "__first*" }, function (result) {
+            if (typeof result != "undefined" && "msg" in result) {
+                ChatBot.setAnimation(result.animation);
+                ChatBot.write(result.msg, "boto");
+            } else {
+                //The server did not erred but we got an empty result (handling as error)
+                ChatBot.handleServerError("No result");
+            }
+        }, "json");
+        // ChatBot.write("Hello, My name is Boto. What is yours?", "boto");
     });
 };
 
@@ -90,7 +99,7 @@ ChatBot.sendMessage = function () {
             sendBtn.addClass("loading");
             ChatBot.write(chatInput.val(), "me");
             //Sending the user line to the server using the POST method
-            $.post(ChatBot.SERVER_PATH + "/chat", {"msg": chatInput.val()}, function (result) {
+            $.post(ChatBot.SERVER_PATH + "/chat", { "msg": chatInput.val() }, function (result) {
                 if (typeof result != "undefined" && "msg" in result) {
                     ChatBot.setAnimation(result.animation);
                     ChatBot.write(result.msg, "boto");
@@ -105,11 +114,12 @@ ChatBot.sendMessage = function () {
     }
 };
 
-$.ajax("/test",{
+$.ajax("/test", {
     type: "POST",
-    data: {"msg": "hello"},
+    data: { "msg": "hello" },
     dataType: "json",
-    contentType: "application/json"})
+    contentType: "application/json"
+})
     .done(function (data) {
         console.log(data);
     });
